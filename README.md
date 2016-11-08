@@ -29,7 +29,3 @@ Just download and  run the script, no require sudo
 ```
 ./zcashbenchmark.sh
 ```
-
-
-
-
