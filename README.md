@@ -25,7 +25,7 @@ The output this something like this:
 =======================================================================
 ```
 ## Usage
-Just down loadd run the scriptm no sudo required
+Just down loadd run the script, no require sudo
 ```
 ./zcashbenchmark.sh
 ```
