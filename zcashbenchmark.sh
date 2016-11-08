@@ -29,7 +29,7 @@ function command_exists () {
 #===============================================================================
 function confirm () {
     # call with a prompt string or use a default
-    read -r -p "${1:-Do your want to share it? [Y/n]} " response
+    read -r -p "${1:- Do your want to share result on zcashbenchmark.com? [Y/n]} " response
     case $response in
         [yY][eE][sS]|[yY])
             true
@@ -81,23 +81,33 @@ function get_system_info () {
 #
 #===============================================================================
 function read_zcash_path () {
-  echo "==================== ZCASH BENCHMARK ==================================="
-  printf "\n\n"
-  echo "Please enter your zcash-cli path if it not is executable command"
-  echo "Example: ~/zcash/zcash-cli "
-  read ZCASH_PATH_CLI
-  echo "Your zcash-cli path: $ZCASH_PATH_CLI"
+  echo " Opps: zcash-cli command not found"
+  read  -r -p " Please enter your zcash-cli path [ex: ~/zcash/zcash-cli]" ZCASH_PATH_CLI
+  echo " Your zcash-cli path: $ZCASH_PATH_CLI"
 
   if [[ -z "$ZCASH_PATH_CLI" ]]; then
     if ! command_exists zcash-cli; then
-      echo "ERROR: zcash-cli command is not exist";
+      echo " ERROR: zcash-cli command is not exist";
       exit 1;
     fi
   elif [ ! [[ -f "$ZCASH_PATH_CLI" && -f "$ZCASH_PATH_CLI" ]] ]; then
-    echo "ERROR: $ZCASH_PATH_CLI is invalid executable file";
+    echo " ERROR: $ZCASH_PATH_CLI is invalid executable file";
     exit 1;
   else
    export ZCASH_PATH_CLI=$ZCASH_PATH_CLI;
+  fi;
+}
+
+#=== FUNCTION ==================================================================
+#
+# Name: check_zcash_cli
+# Description: Check zcash cli command
+# Parammeter: ---
+#
+#===============================================================================
+function check_zcash_cli () {
+  if ! command_exists zcash-cli; then 
+    read_zcash_path
   fi;
 }
 
@@ -110,8 +120,11 @@ function read_zcash_path () {
 function ask_for_share_result () {
   SHARE_RESULT=1
   if confirm ; then
-    read -r -p "What's your name? [anonymous] " username
+    read -r -p " What's your name? [anonymous] " username
     USERNAME=${username:-'anonymous'}
+    echo ""
+    echo " Thank for your sharing $username, your result will be updated on zcashbenchmark.com"
+    sleep 2;
   else
    SHARE_RESULT=0;
   fi;
@@ -125,15 +138,17 @@ function ask_for_share_result () {
 #===============================================================================
 function run_benchmark () {
   echo ""
+  echo "======================================================================="
+  echo " Starting benchmark your system"
   echo ""
-  echo "Starting benchmark your system"
+  echo " WARNING: - Make sure that your zcashd is running"
+  echo "          - It can take several minutes, please don't interrupt it"
   echo ""
-  echo "WARNING: - Make sure that your zcashd is running"
-  echo "         - It can take several minutes, please don't interrupt it"
-  echo ""
-  echo "1. Run zcash-cli zcbenchmark solveequihash 20 to run 20 benchmark tests"
-  echo "2. Calculate the average time of those results (total time / 20)"
+  echo " 1. Run zcash-cli zcbenchmark solveequihash 20 to run 20 benchmark tests"
+  echo " 2. Calculate the average time of those results (total time / 20)"
   printf "\n"
+
+  sleep 5;
 
   if [[ -z "$ZCASH_PATH_CLI" ]]; then
     RAW_RESULT=`zcash-cli zcbenchmark solveequihash 20`
@@ -199,12 +214,15 @@ function share_result () {
 #
 #===============================================================================
 function main () {
-  read_zcash_path;
+  echo "==================== ZCASH BENCHMARK ==================================="
+  printf "\n"
+  echo " Hi there, after run benchmark on your system"
+  check_zcash_cli;
   ask_for_share_result;
   get_system_info;
   run_benchmark;
   show_result;
 }
 
-# MAIN
+# CAll MAIN FUNCION
 main
